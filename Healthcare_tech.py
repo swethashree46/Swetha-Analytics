@@ -1,192 +1,132 @@
 import pymysql
 import pandas as pd
 import numpy as np
-from sqlalchemy import create_engine
 
-# Establish a connection to the database
+# Connect to the database
 connection = pymysql.connect(
-    host='localhost',        # Your MySQL server address (localhost if running locally)
-    user='root',             # MySQL username (root by default)
-    password='Swetha@546',   # Your MySQL password
-    db='healthcare_tech_db'  # The database you want to connect to
+    host='localhost',
+    user='root',
+    password='Swetha@546',
+    db='healthcare_tech_db'
 )
 
 print("Connection successful!")
-
-# Create a cursor object
 cursor = connection.cursor()
 
-# Query to fetch data from the technology table
-query = """
+
+query1 = """
 SELECT tech_name, impact_area, employment_impact, success_status
 FROM technology;
 """
 
-# Execute the query
-cursor.execute(query)
+cursor.execute(query1)
+data1 = cursor.fetchall()
+columns1 = ['tech_name', 'impact_area', 'employment_impact', 'success_status']
+df1 = pd.DataFrame(data1, columns=columns1)
 
-# Fetch all rows from the query result
-data = cursor.fetchall()
+print("\nFull Technology Data:")
+print(df1)
 
-# Define column names corresponding to the SELECT statement
-columns = ['tech_name', 'impact_area', 'employment_impact', 'success_status']
+user_input = input("\nEnter an impact area to filter (e.g., 'Patient Care', 'Data security', etc.): ").strip()
 
-# Create a pandas DataFrame
-df = pd.DataFrame(data, columns=columns)
+query2 = """
+SELECT tech_name, impact_area, employment_impact, success_status
+FROM technology
+WHERE impact_area = %s;
+"""
 
-# Close the cursor and connection
-cursor.close()
-connection.close()
-#
-# # Print the DataFrame to verify the data
-print(df)
+cursor.execute(query2, (user_input,))
+data2 = cursor.fetchall()
+columns2 = ['tech_name', 'impact_area', 'employment_impact', 'success_status']
+df2 = pd.DataFrame(data2, columns=columns2)
 
-# cursor = connection.cursor()
-#
-# # Query to fetch data from the technology table
-# query = """"""
-# # Execute the query
-# cursor.execute(query)
-#
-# # Fetch all rows from the query result
-# data = cursor.fetchall()
-
-# # Convert the fetched data to a pandas DataFrame
-# # columns = ['tech_name', 'failure_count']
-
-# df = pd.DataFrame(data, columns=columns)
-#
-# # Commit the transaction (not really needed here, but kept for consistency)
-# connection.commit()
-#
-# # Close the connection
-# cursor.close()
-# connection.close()
-#
-# # Print the DataFrame to verify the data
-# print(df)
-
-# Group by success status
-# print("\nSuccess status counts:")
-# print(df['success_status'].value_counts())
-#
-# # Average manpower change (if it's numeric, else you may want to count occurrences)
-# print("\nManpower change counts:")
-# print(df['manpower_change'].value_counts())
-#
-# # Filter completed technologies
-# completed = df[df['status'] == 'completed']
-# print("\nCompleted Technologies:")
-# print(completed[['tech_name', 'status']])
-#
-# # Technologies that were successful
-# success_tech = df[df['success_status'].str.lower() == 'success']
-# print("\nSuccessful Technologies:")
-# print(success_tech[['tech_name', 'status']])
-#
-# # Technologies that failed
-# failure_tech = df[df['success_status'].str.lower() == 'failure']
-# print("\nFailed Technologies:")
-# print(failure_tech[['tech_name', 'status']])
-
-import matplotlib.pyplot as plt
-
-# Count of successful and failed technologies
-# status_count = df['success_status'].value_counts()
-#
-# plt.bar(status_count.index, status_count.values)
-# plt.title('Success vs. Failure of Technologies')
-# plt.xlabel('Status')
-# plt.ylabel('Count')
-# plt.show()
+print(f"\nFiltered Data for Impact Area = '{user_input}':")
+print(df2)
 
 
-# Check column names
-# print(df.columns)
-#
-# # If the column exists and is clean, proceed with the pie chart
-# impact_area_count = df['impact_area'].value_counts()
-#
-# plt.pie(impact_area_count, labels=impact_area_count.index, autopct='%1.1f%%', startangle=90)
-# plt.title('Distribution of Technologies by Impact Area')
-# plt.show()
 
-# manpower_change_count = df['manpower_change'].value_counts()
-#
-# # Stacked bar chart
-# manpower_change_count.plot(kind='bar', stacked=True, color=['blue', 'orange'])
-# plt.title('Manpower Change by Technology')
-# plt.xlabel('Manpower Change')
-# plt.ylabel('Count')
-# plt.show()
+df2['employment_impact'] = df2['employment_impact'].str.strip().str.lower()
 
-# Ensure 'year' is a numeric column
-# df['year'] = pd.to_numeric(df['year'], errors='coerce')
+impact_counts = df2['employment_impact'].value_counts()
 
-# Drop rows where 'year' is NaN
-# df = df.dropna(subset=['year'])
-
-# Count the number of technologies per year
-# technologies_per_year = df['year'].value_counts().sort_index()
-
-# Plot the data
-# plt.plot(technologies_per_year.index, technologies_per_year.values)
-# plt.title('Technologies Developed Over the Years')
-# plt.xlabel('Year')
-# plt.ylabel('Number of Technologies')
-# plt.show()
-#
-# top_5_impact_areas = df['impact_area'].value_counts().head(5)
-#
-# top_5_impact_areas.plot(kind='bar', color='skyblue', edgecolor='black')
-# plt.title('Top 5 Impact Areas')
-# plt.xlabel('Impact Area')
-# plt.ylabel('Frequency')
-# plt.xticks(rotation=45)
-# plt.tight_layout()
-# plt.show()
-
-
-# Sample data (you will replace this with your actual data from SQL query)
-data = {
-    'tech_name': ['Telehealth', 'AI in Diagnostics', 'Wearable Health Devices', 'Blockchain for Health Data', '3D Printing for Prosthetics',
-                  'Remote Patient Monitoring (RPM)', 'Genomic Medicine', 'Nanomedicine', 'AI Virtual Health Assistants', 'Robotic Surgery',
-                  'EHR Systems', 'Augmented Reality (AR) in Surgery', 'Precision Medicine', 'Mobile Health Apps', 'Smart Hospitals',
-                  'AI-Assisted Surgery', 'Chatbots for Mental Health', 'Cloud Healthcare Systems', 'AI for Drug Discovery', 'Digital Pathology',
-                  'Cybersecurity Solutions', 'AI Radiology Assist', 'Home ICU Monitoring', 'Bio-sensors', 'Voice Recognition EHR',
-                  'AI-Powered Triage', 'Digital Therapeutics', 'Electronic Prescriptions (eRx)', 'AI-Based ICU Management', 'Smart Ambulances'],
-    'employment_impact': ['Decreased', 'Decreased', 'Decreased', 'Decreased', 'Decreased', 'Decreased', 'Increased', 'Increased', 'Decreased', 'Increased',
-                          'Decreased', 'Increased', 'Increased', 'Decreased', 'Decreased', 'Increased', 'Decreased', 'Decreased', 'Increased', 'Increased',
-                          'Increased', 'Increased', 'Increased', 'Decreased', 'Decreased', 'Increased', 'Decreased', 'Increased', 'Decreased', 'Increased']
+summary = {
+    'Total Technologies': len(df2),
+    'Increased Employment': impact_counts.get('increased', 0),
+    'Decreased Employment': impact_counts.get('decreased', 0),
+    'Neutral Employment': impact_counts.get('neutral', 0),  # in case it's there
+    'Success Rate (%)': (df2['success_status'].str.strip().str.lower() == 'success').mean() * 100
 }
 
-df = pd.DataFrame(data)
+# Display the summary
+print("\n Analysis Summary:")
+for key, value in summary.items():
+    print(f"{key}: {value:.2f}" if isinstance(value, float) else f"{key}: {value}")
 
-# Filter technologies that increased employment
-df_increase = df[df['employment_impact'] == 'Increased']
 
-# Filter technologies that decreased employment
-df_decrease = df[df['employment_impact'] == 'Decreased']
+try:
+    year_input = int(input("\nEnter a published year (2023 - 2025): ").strip())
 
-# Count occurrences of each category
-increase_counts = df_increase['tech_name'].value_counts()
-decrease_counts = df_decrease['tech_name'].value_counts()
+    if year_input < 2023 or year_input > 2025:
+        print("Please enter a year between 2023 and 2025.")
+    else:
+        query_year = """
+        SELECT tech_name, impact_area, employment_impact, success_status, year
+        FROM technology
+        WHERE year = %s;
+        """
 
-# Plotting the data
-plt.figure(figsize=(10, 6))
+        cursor.execute(query_year, (year_input,))
+        year_data = cursor.fetchall()
 
-# Plot the "Increased" employment technologies
-plt.bar(increase_counts.index, increase_counts.values, color='green', label='Increased Employment')
+        columns = ['tech_name', 'impact_area', 'employment_impact', 'success_status', 'year']
+        df_year = pd.DataFrame(year_data, columns=columns)
 
-# Plot the "Decreased" employment technologies
-plt.bar(decrease_counts.index, decrease_counts.values, color='red', label='Decreased Employment')
+        if not df_year.empty:
+            print(f"\nTechnologies Published in {year_input}:")
+            print(df_year)
 
-plt.title('Technologies Impacting Employment')
-plt.xlabel('Technology')
-plt.ylabel('Count')
-plt.xticks(rotation=90)
-plt.legend()
 
-plt.tight_layout()
-plt.show()
+            df_year['employment_impact'] = df_year['employment_impact'].str.strip().str.lower()
+            df_year['success_status'] = df_year['success_status'].str.strip().str.lower()
+
+            # Count impact categories
+            impact_counts = df_year['employment_impact'].value_counts()
+
+
+            summary = {
+                'Total Technologies': len(df_year),
+                'Increased Employment': impact_counts.get('increased', 0),
+                'Decreased Employment': impact_counts.get('decreased', 0),
+                'Neutral Employment': impact_counts.get('neutral', 0),
+                'Success Rate (%)': (df_year['success_status'] == 'success').mean() * 100
+            }
+
+            print("\nYear-Based Analysis:")
+            for key, value in summary.items():
+                print(f"{key}: {value:.2f}" if isinstance(value, float) else f"{key}: {value}")
+        else:
+            print(f"\n No technologies found for year {year_input}.")
+
+except ValueError:
+    print("Invalid year. Please enter a number like 2024.")
+
+tech_input = input("\nEnter a technology name to check its success status: ").strip()
+
+query_status = """
+SELECT tech_name, success_status
+FROM technology
+WHERE LOWER(tech_name) = LOWER(%s);
+"""
+
+cursor.execute(query_status, (tech_input,))
+tech_status_data = cursor.fetchone()
+
+if tech_status_data:
+    tech_name, success_status = tech_status_data
+    print(f"\nSuccess Status of '{tech_name}': {success_status}")
+else:
+    print(f"\nTechnology '{tech_input}' not found in the database.")
+
+cursor.close()
+connection.close()
 
